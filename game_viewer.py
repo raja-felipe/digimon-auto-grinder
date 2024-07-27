@@ -7,7 +7,7 @@ import json
 
 
 def extract_ds_window():
-    with open("config.json", "r") as fp:
+    with open("priv_config.json", "r") as fp:
         config = json.load(fp)
         window_name = config["ds_window"]
 
