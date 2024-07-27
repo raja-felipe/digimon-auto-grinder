@@ -23,8 +23,8 @@ def show_ds_player():
 
     window_bounds = extract_ds_window()
     bounding_box = {
-        "top" : window_bounds[0],
-        "left": window_bounds[1],
+        "left": window_bounds[0],
+        "top" : window_bounds[1],
         "width": window_bounds[2],
         "height": window_bounds[3]
         }
