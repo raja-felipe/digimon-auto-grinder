@@ -1,12 +1,13 @@
 from desmume.emulator import DeSmuME
 import json
+import multiprocessing
 
 class DS_Runner:
-    def __init__(self):
+    def __init__(self, dl_name=None):
         with open("priv_config.json", "r") as fp:
             self.file_location = json.load(fp)["file_location"]
 
-        self.game_instance = DeSmuME()
+        self.game_instance = DeSmuME(dl_name)
         return
     
     def open_ds(self):
@@ -24,3 +25,5 @@ class DS_Runner:
 if __name__ == "__main__":
     ds_runner = DS_Runner()
     ds_runner.open_ds()
+    # ds_runner_2 = DS_Runner()
+    # ds_runner_2.open_ds()
