@@ -41,7 +41,7 @@ class DS_Runner:
         window = self.game_instance.create_sdl_window()
         prev_input = Keys.KEY_NONE
         self.unpress_all_keys()
-        self.game_instance._savestate.load(1)
+        # self.game_instance._savestate.load(1)
 
         # These are needed as you need to assign each frame individually
         # to press and unpress buttons
