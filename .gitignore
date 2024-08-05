@@ -162,3 +162,4 @@ cython_debug/
 priv_config.json
 game_file/
 ds_emulators/
+test_files/
