@@ -1,12 +1,14 @@
 from desmume.emulator import DeSmuME, SCREEN_HEIGHT, SCREEN_HEIGHT_BOTH, SCREEN_WIDTH
 import json
 import multiprocessing
-from playstyle import PlayStyle
-from randomPlayStyle import RandomPlayStyle
+from Agents.playstyle import PlayStyle
+from Agents.randomPlayStyle import RandomPlayStyle
 from desmume.controls import keymask, Keys
 import time
 from PIL import Image
 import inspect
+
+FRAME_COUNT_TO_PRESS = 1
 
 class DS_Runner:
     def __init__(self, playstyle: PlayStyle, dl_name=None):
@@ -45,7 +47,6 @@ class DS_Runner:
 
         # These are needed as you need to assign each frame individually
         # to press and unpress buttons
-        FRAME_COUNT_TO_PRESS = 120
         curr_frame_count = 0
 
         # Run the emulation as fast as possible until quit
