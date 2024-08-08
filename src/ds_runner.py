@@ -1,7 +1,9 @@
-from desmume.emulator import DeSmuME, SCREEN_HEIGHT, SCREEN_HEIGHT_BOTH, SCREEN_WIDTH
+from desmume.emulator import DeSmuME, DeSmuME_SDL_Window, SCREEN_HEIGHT, SCREEN_HEIGHT_BOTH, SCREEN_WIDTH
 import json
 import multiprocessing
+from Agents.agent import Agent
 from Agents.playstyle import PlayStyle
+from Agents.test_playstyle import TestPlayStyle
 from Agents.randomPlayStyle import RandomPlayStyle
 from desmume.controls import keymask, Keys
 import time
@@ -9,16 +11,28 @@ from PIL import Image
 import inspect
 
 FRAME_COUNT_TO_PRESS = 1
+FRAME_COUNT_TO_START = 150
+FRAMES_TO_WAIT = 660
 
 class DS_Runner:
+
+    file_location : str
+    curr_frame_count : int
+    game_instance : DeSmuME
+    play_style : PlayStyle
+    prev_action : int
+    window : DeSmuME_SDL_Window
+
     def __init__(self, playstyle: PlayStyle, dl_name=None):
         with open("priv_config.json", "r") as fp:
             self.file_location = json.load(fp)["file_location"]
-
+        self.curr_frame_count = 0
         self.game_instance = DeSmuME(dl_name)
-        self.play_mode = playstyle
-        self.prev_action = 1
+        self.play_style = playstyle
+        self.prev_action = Keys.KEY_NONE
         self.window = None
+        self.curr_frames_to_wait = FRAMES_TO_WAIT
+        self.is_starting = True
         return
     
     def buffer_to_image(self, buffer):
@@ -33,69 +47,65 @@ class DS_Runner:
         self.game_instance.open(self.file_location)
         return
     
+    def wait_for_title_screen(self):
+        # print(f"frames left : {self.curr_frames_to_wait}")
+        self.curr_frames_to_wait -= 1
+        return
+    
     def play_ds(self):
-        # for _ in range(180):
-        #     curr_action = self.get_action()
-        #     self.press_key(curr_action)
-        #     self.unpress_key()
-        # self.buffer_to_image(self.game_instance.display_buffer_as_rgbx()).show()
-
         window = self.game_instance.create_sdl_window()
-        prev_input = Keys.KEY_NONE
         self.unpress_all_keys()
-        # self.game_instance._savestate.load(1)
-
-        # These are needed as you need to assign each frame individually
-        # to press and unpress buttons
-        curr_frame_count = 0
 
         # Run the emulation as fast as possible until quit
         while not window.has_quit():
 
             window.process_input()
 
-            if curr_frame_count == FRAME_COUNT_TO_PRESS:
-                curr_action = self.play_mode.play()
-                print("PRESSED ACTION:", curr_action)
-                self.game_instance.input.keypad_add_key(curr_action)
-                prev_input = curr_action
-                curr_frame_count = 0
+            if self.curr_frames_to_wait > 0:
+                self.wait_for_title_screen()
+
+            elif self.play_style.get_is_starting():
+                self.do_button_press(FRAME_COUNT_TO_START)
+            
             else:
-                if curr_frame_count == 0:
-                    print("UNPRESSING ACTION:", prev_input)
-                    self.game_instance.input.keypad_rm_key(prev_input)
-                curr_frame_count += 1
-            # print(f"CURR ACTION: {self.game_instance.input.keypad_get()}")  
+                self.do_button_press(FRAME_COUNT_TO_START)  
 
             self.game_instance.cycle(with_joystick=False)
             window.draw()
 
-
-    def press_key(self, key : int, time_pressed : float = 3):
+    def do_button_press(self, frame_timer:int):
+        if self.curr_frame_count == frame_timer:
+            self.press_action_key()
+        else:
+            if self.curr_frame_count == 0:
+                self.unpress_action_key()
+            self.curr_frame_count += 1
+        # print(f"CURR ACTION: {self.game_instance.input.keypad_get()}")  
+    def press_action_key(self, time_pressed : float = 3):
         """
         use this to press the button designated for the key
         """
-        print(f"Going to press: {key}")
-        self.game_instance.input.keypad_add_key(key)
-        print("Current Keypad: ", self.game_instance.input.keypad_get())
-        self.prev_action = key
+        curr_action = self.get_action()
+        # print("PRESSED ACTION:", curr_action)
+        self.game_instance.input.keypad_add_key(curr_action)
+        self.prev_action = curr_action
+        self.curr_frame_count = 0
         # curr_time = time.time()
         # while (time.time() - curr_time < time_pressed):
         #     continue
         # print(f"Going to release: {key}")
         return
     
-    def unpress_key(self, time_pressed : float = 3):
+    def unpress_action_key(self, time_pressed : float = 3):
         """
         use this to press the button designated for the key
         """
-        print(f"Going to release: {self.prev_action}")
+        # print("UNPRESSING ACTION:", self.prev_action)
         self.game_instance.input.keypad_rm_key(self.prev_action)
-        print("Current Keypad: ", self.game_instance.input.keypad_get())
+        # print("Current Keypad: ", self.game_instance.input.keypad_get())
         return
     
     def unpress_all_keys(self):
-        # print(inspect.getmembers(Keys()))
         for key in inspect.getmembers(Keys()):
             key_name = key[0]
             key_val = key[1]
@@ -103,14 +113,10 @@ class DS_Runner:
                 self.game_instance.input.keypad_rm_key(key_val)
     
     def get_action(self) -> int:
-        return self.play_mode.play()
-    
-    # def act(self):
-    #     self.press_key(self.play_mode.play())
+        return self.play_style.select_action()
     
 if __name__ == "__main__":
-    random_playstyle = PlayStyle()
-    ds_runner = DS_Runner(playstyle=random_playstyle)
+    selected_playstyle = RandomPlayStyle()
+    ds_runner = DS_Runner(playstyle=selected_playstyle)
     ds_runner.open_ds()
-    # print(ds_runner.game_instance.is_running())
     ds_runner.play_ds()
