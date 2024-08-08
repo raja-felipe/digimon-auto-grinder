@@ -1,14 +1,14 @@
-from playstyle import PlayStyle
-from desmume.controls import Keys
+from Agents.playstyle import PlayStyle
+from Misc.proper_controls import DSKeys
 import random
 
 class RandomPlayStyle(PlayStyle):
     def __init__(self):
         super().__init__()
-        self.key_values = [value for _, value in Keys.__dict__.items() if isinstance(value, int)]
+        self.key_values = [key.value for key in DSKeys]
         return
     
-    def play(self):
+    def action_play(self):
         random_move = random.choice(self.key_values)
         print(random_move)
         return random_move

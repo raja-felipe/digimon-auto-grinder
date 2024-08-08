@@ -1,18 +1,19 @@
 from Agents.playstyle import PlayStyle
 from Misc.proper_controls import DSKeys
 
-class TestPlaystyle(PlayStyle):
+class TestPlayStyle(PlayStyle):
 
     def __init__(self):
-        self.prev_played = DSKeys.KEY_B
-        self.loop_button = DSKeys.KEY_B
-        self.control_sequence = [DSKeys.KEY_START, DSKeys.KEY_B]
+        super().__init__()
+        self.prev_played = DSKeys.KEY_B.value
+        self.loop_button = DSKeys.KEY_B.value
+        self.control_sequence = [DSKeys.KEY_START.value, DSKeys.KEY_B.value]
 
         self.input_index = 0
 
         return
     
-    def play(self) -> int:
+    def action_play(self) -> int:
         """
         play returns the action the emulator should do
         """
