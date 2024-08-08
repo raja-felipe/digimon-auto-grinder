@@ -8,6 +8,9 @@ class DSKeys(Enum):
     KEY_Y = Keys.KEY_Y
     KEY_R = Keys.KEY_R
     KEY_L = Keys.KEY_L
+    KEY_UP = keymask(Keys.KEY_UP)
+    KEY_DOWN = keymask(Keys.KEY_DOWN)
+    KEY_LEFT = keymask(Keys.KEY_LEFT)
+    KEY_RIGHT = keymask(Keys.KEY_RIGHT)
     KEY_START = keymask(Keys.KEY_START)
     KEY_SELECT = keymask(Keys.KEY_SELECT)
-    NO_KEY_SET = 0xFFFF
