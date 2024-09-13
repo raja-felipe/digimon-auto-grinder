@@ -12,6 +12,7 @@ The environment for game playing has been created, which is all ran through `ds_
 
 Basic Run
 ------------
+* **Running everything requires DeSmuME to be installed**
 * To run:
   ```bash
   $ python -m init_auto_player
